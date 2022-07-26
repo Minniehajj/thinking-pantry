@@ -1,10 +1,11 @@
+import React from "react";
 import { AsyncReturnType, trpc } from "../../utils/trpc";
 
 const ListOfIngredients = () => {
   const { data, isLoading } = trpc.useQuery(["ingredient.getSortedIng"]);
   return (
     <div>
-      <ul>
+      <div className="grid gap-8 grid-cols-5 max-w-xl">
         {data && (
           <>
             {data.map((ingredient, key) => {
@@ -13,20 +14,18 @@ const ListOfIngredients = () => {
                 dayUseBy.getDate() + ingredient.category.daysGoodFor
               );
               return (
-                <li key={key}>
-                  <>
-                    {ingredient.name}
-                    {ingredient.quantity}
-                    {ingredient.category.name}
-                    {ingredient.dayAcquired.toString()}
-                    {dayUseBy.toString()}
-                  </>
-                </li>
+                <React.Fragment key={key}>
+                  <span>{ingredient.name}</span>
+                  <span>{ingredient.quantity}</span>
+                  <span>{ingredient.category.name}</span>
+                  <span>{ingredient.dayAcquired.toString()}</span>
+                  <span>{dayUseBy.toString()}</span>
+                </React.Fragment>
               );
             })}
           </>
         )}
-      </ul>
+      </div>
     </div>
   );
 };
