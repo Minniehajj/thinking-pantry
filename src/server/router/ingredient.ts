@@ -39,7 +39,7 @@ export const ingredientRouter = createRouter()
         where: { name: name },
       });
       console.log(existing);
-      if (existing === null) {
+      if (existing === null || existing?.quantity === undefined) {
         return 0;
       }
 
