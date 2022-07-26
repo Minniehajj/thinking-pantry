@@ -1,7 +1,11 @@
-import { trpc } from "../src/utils/trpc";
-import { ingredientRouter } from "/home/aminebady/personalProjects/thinking-pantry/src/server/router/ingredient";
+import { Ingredient, Prisma } from "@prisma/client";
+import { AsyncReturnType, trpc } from "../utils/trpc";
 
-function fillIngredientList(ingredientData: any[]): string[] {
+const ingData = trpc.useQuery(["ingredient.getSortedIng"]);
+
+
+
+function fillIngredientList(ingredientData: Ingredient) {
   return ingredientData?.map((a) => {
     const dayUseBy = new Date(a.dayAcquired);
     dayUseBy.setDate(dayUseBy.getDate() + a.category.daysGoodFor);
@@ -11,4 +15,3 @@ function fillIngredientList(ingredientData: any[]): string[] {
   });
 }
 export default fillIngredientList;
-

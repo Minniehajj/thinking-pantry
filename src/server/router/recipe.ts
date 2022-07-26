@@ -2,7 +2,7 @@ import { createRouter } from "./context";
 import { date, z } from "zod";
 import { Prisma } from "@prisma/client";
 import { isBigInt64Array } from "util/types";
-import findIngredientsForRecipe from "../../../scripts/getIngredientsFromRecipe";
+import findIngredientsForRecipe from "../../scripts/getIngredientsFromRecipe";
 
 export const recipeRouter = createRouter()
   .query("hello", {

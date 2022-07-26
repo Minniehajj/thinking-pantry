@@ -1,18 +1,15 @@
 import Link from "next/link";
 import { ingredientRouter } from "../server/router/ingredient";
-import { trpc } from "../utils/trpc";
+import { AsyncReturnType, trpc } from "../utils/trpc";
 import React from "react";
-import fillIngredientList from "../../scripts/ListOfIngredients";
-import warningIng from "../../scripts/ListOfNearExp";
+import fillIngredientList from "../scripts/ListOfIngredients";
+import warningIng from "../scripts/ListOfNearExp";
 
-
-//import warningIng from "/home/aminebady/personalProjects/thinking-pantry/scripts/ListOfNearExp";
-
-const ingredientPage = () => {
+const ingredientPage = async () => {
   const ingData = trpc.useQuery(["ingredient.getSortedIng"]);
 
   const ingWarnData = trpc.useQuery(["ingredient.getIngByDate"]);
-
+  type QueryRet = AsyncReturnType<typeof ingData.data>;
   const warningList = warningIng(ingWarnData?.data);
   const theList = fillIngredientList(ingData?.data);
 
@@ -25,7 +22,7 @@ const ingredientPage = () => {
       <h2>
         name: quanity: date acquired: day to be used by: days still good for:
       </h2>
-      <ul dangerouslySetInnerHTML={{ __html: theList }}></ul>
+      <ul dangerouslySetInnerHTML={{ __html: theList.toString() }}></ul>
     </div>
   );
 };

@@ -5,8 +5,8 @@ import superjson from "superjson";
 import { recipeRouter } from "./recipe";
 import { ingredientRouter } from "./ingredient";
 
-import fillIngredientList from "/home/aminebady/personalProjects/thinking-pantry/scripts/ListOfIngredients";
-import  warningIng  from "/home/aminebady/personalProjects/thinking-pantry/scripts/ListOfNearExp";
+import fillIngredientList from "../../scripts/ListOfIngredients";
+import  warningIng  from "../../scripts/ListOfNearExp";
 
 
 export const appRouter = createRouter()

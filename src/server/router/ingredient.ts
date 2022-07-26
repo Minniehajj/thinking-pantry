@@ -44,7 +44,7 @@ export const ingredientRouter = createRouter()
       }
 
       try {
-        const created = await prisma?.category.update({
+        await prisma?.category.update({
           where: { id: catId?.id },
           data: {
             Ingredient: {
