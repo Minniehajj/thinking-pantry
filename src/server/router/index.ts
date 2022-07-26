@@ -2,12 +2,16 @@
 import { createRouter } from "./context";
 import superjson from "superjson";
 
-import { exampleRouter } from "./example";
+import { recipeRouter } from "./recipe";
 import { ingredientRouter } from "./ingredient";
+
+import fillIngredientList from "/home/aminebady/personalProjects/thinking-pantry/scripts/ListOfIngredients";
+import  warningIng  from "/home/aminebady/personalProjects/thinking-pantry/scripts/ListOfNearExp";
+
 
 export const appRouter = createRouter()
   .transformer(superjson)
-  .merge("example.", exampleRouter)
+  .merge("example.", recipeRouter)
   .merge("ingredient.", ingredientRouter);
 
 // export type definition of API
