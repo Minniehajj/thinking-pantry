@@ -1,11 +1,11 @@
-import { Ingredient, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { AsyncReturnType, trpc } from "../utils/trpc";
 
 const ingData = trpc.useQuery(["ingredient.getSortedIng"]);
 
 
 
-function fillIngredientList(ingredientData: Ingredient) {
+function fillIngredientList(ingredientData) {
   return ingredientData?.map((a) => {
     const dayUseBy = new Date(a.dayAcquired);
     dayUseBy.setDate(dayUseBy.getDate() + a.category.daysGoodFor);

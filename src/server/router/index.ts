@@ -11,7 +11,7 @@ import  warningIng  from "../../scripts/ListOfNearExp";
 
 export const appRouter = createRouter()
   .transformer(superjson)
-  .merge("example.", recipeRouter)
+  .merge("recipe.", recipeRouter)
   .merge("ingredient.", ingredientRouter);
 
 // export type definition of API

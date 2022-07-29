@@ -24,7 +24,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "src/pages/components/ListOfIngForRec"  ],
   "exclude": [
     "node_modules"
   ]

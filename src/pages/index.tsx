@@ -16,7 +16,7 @@ const Home: NextPage = () => {
       await utils.invalidateQueries(["ingredient.getAll"]);
     },
   });
-  const recipesAble = trpc.useQuery(["example.getRecipesAble"]);
+  const recipesAble = trpc.useQuery(["recipe.getRecipesAble"]);
 
   const [name, setName] = React.useState("");
   const [quanity, setQuanity] = React.useState(Number);
@@ -72,13 +72,13 @@ const Home: NextPage = () => {
             <label htmlFor="canBeUsedUp" className="ml-2">
               Can Be Used Up
             </label>
-            <input
+            {/* <input
               type="checkbox"
               className="border p-2"
               id="canBeUsedUp"
               name="canBeUsedUp"
               onChange={(e) => setCanBeUsedUp(e.target.checked)}
-            />
+            /> */}
             <select onChange={(e) => setCategory(e.target.value)}>
               <option value="Dairy">Dairy</option>
               <option value="Raw Meat">Raw Meat</option>
@@ -90,17 +90,20 @@ const Home: NextPage = () => {
             Submit
           </button>
         </form>
-        <ListOfIngredients />
+
         <div>
           <Link href="/ingredients">
             <a>List of Current Ingredients</a>
           </Link>
 
           <Link href="/recipes">
-            <a>List of Current recipes</a>
+            <a>List of Currently possible recipes</a>
+          </Link>
+          <Link href="/AllRecipes">
+            <a>List of All Recipes</a>
           </Link>
         </div>
-        <div> {/* <p>{JSON.stringify(recipesAble)}</p> */}</div>
+        {/* <div> <ListOfIngredients /></div> */}
       </div>
     </>
   );

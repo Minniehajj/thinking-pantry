@@ -18,8 +18,8 @@ const ListOfIngredients = () => {
                   <span>{ingredient.name}</span>
                   <span>{ingredient.quantity}</span>
                   <span>{ingredient.category.name}</span>
-                  <span>{ingredient.dayAcquired.toString()}</span>
-                  <span>{dayUseBy.toString()}</span>
+                  <span>{ingredient.dayAcquired.toString().slice(0, 15)}</span>
+                  <span>{dayUseBy.toString().slice(0, 15)}</span>
                 </React.Fragment>
               );
             })}

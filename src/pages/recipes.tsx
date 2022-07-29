@@ -2,11 +2,10 @@ import Link from "next/link";
 import { trpc } from "../utils/trpc";
 import React from "react";
 import fillRecipeList from "../scripts/MakeListFromRecipe";
+import ListOfRecipesCanUse from "./components/ListOfPossible";
+import ListOfRecipesOneAway from "./components/OneIngAway";
 
 const recipesPage = () => {
-  const ReciData = trpc.useQuery(["example.getRecipesAble"]);
-  const theList = fillRecipeList(ReciData.data);
-
   return (
     <div>
       <Link href="/">
@@ -14,7 +13,11 @@ const recipesPage = () => {
       </Link>
       <h1>List of possible recipes:</h1>
       <h2>Recipes currently possible with ingredients in database:</h2>
-      <ul dangerouslySetInnerHTML={{ __html: theList.toString() }}></ul>
+      <div>
+        <ListOfRecipesCanUse />
+      </div>
+      <h2>Recipes Missing only one ingredient!</h2>
+      <ListOfRecipesOneAway />
     </div>
   );
 };

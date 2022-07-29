@@ -90,4 +90,18 @@ export const ingredientRouter = createRouter()
         },
       });
     },
+  })
+  .query("getMissingAmount", {
+    input: z.object({
+      recipeId: z.string().nullish(),
+      ingredientId: z.string(),
+    }),
+    async resolve({ input, ctx }) {
+      const recipeId = input.recipeId;
+      const ingredientId = input?.ingredientId;
+      const missingAm = await ctx.prisma.ingredientUsed.findFirstOrThrow({
+        where: { recipeId: recipeId, ingredientId: ingredientId },
+      });
+      return missingAm.amountUsed;
+    },
   });
