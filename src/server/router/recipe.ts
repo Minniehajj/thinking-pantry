@@ -1,5 +1,6 @@
 import { createRouter } from "./context";
 import { boolean, date, z } from "zod";
+import { PrismaPromise } from "@prisma/client";
 
 export const recipeRouter = createRouter()
   .query("hello", {
@@ -194,16 +195,16 @@ export const recipeRouter = createRouter()
         },
       });
 
-      await prisma?.$transaction(
-        ingredientCount.map(async (a) => {
-          await ctx.prisma.ingredient.update({
+      await prisma?.$transaction(async (prisma) => {
+        ingredientCount.forEach(async (a) => {
+          return await prisma.ingredient.update({
             where: { id: a.ingredientId },
             data: {
-              quantity: Math.max(0, a.ingredient.quantity - a.amountUsed),
+              quantity: a.ingredient.quantity - a.amountUsed,
             },
           });
-        })
-      );
+        });
+      });
     },
   })
   .mutation("reduceIngUsed", {
