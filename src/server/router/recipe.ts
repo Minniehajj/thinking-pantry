@@ -195,16 +195,15 @@ export const recipeRouter = createRouter()
         },
       });
 
-      await ctx.prisma?.$transaction(async (prisma) => {
-        ingredientCount.forEach(async (a) => {
-          return await ctx.prisma.ingredient.update({
-            where: { id: a.ingredientId },
-            data: {
-              quantity: a.ingredient.quantity - a.amountUsed,
-            },
-          });
+      const queries = ingredientCount.map((a) => {
+        return ctx.prisma.ingredient.update({
+          where: { id: a.ingredientId },
+          data: {
+            quantity: Math.max(0, a.ingredient.quantity - a.amountUsed),
+          },
         });
       });
+      await ctx.prisma.$transaction([...queries]);
     },
   })
   .mutation("reduceIngUsed", {
