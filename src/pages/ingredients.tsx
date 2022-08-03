@@ -1,5 +1,6 @@
 import Link from "next/link";
 import React from "react";
+import { trpc } from "../utils/trpc";
 import ListOfIngredients from "./components/ListOfIngredients";
 import ListOfIngUseSoon from "./components/ListOfUseSoon";
 

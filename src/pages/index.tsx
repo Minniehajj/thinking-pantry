@@ -93,7 +93,7 @@ const Home: NextPage = () => {
 
         <div>
           <Link href="/ingredients">
-            <a>List of Current Ingredients</a>
+            <a>List of Ingredients</a>
           </Link>
 
           <Link href="/recipes">

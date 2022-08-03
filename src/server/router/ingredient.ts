@@ -34,11 +34,10 @@ export const ingredientRouter = createRouter()
         where: { name: category },
       });
 
-      console.log("categoryId");
       const existing = await prisma?.ingredient.findFirst({
         where: { name: name },
       });
-      console.log(existing);
+
       if (existing === null || existing?.quantity === undefined) {
         return 0;
       }
@@ -72,6 +71,7 @@ export const ingredientRouter = createRouter()
           name: true,
           quantity: true,
           dayAcquired: true,
+          id: true,
           category: { select: { name: true, daysGoodFor: true } },
         },
       });
@@ -103,5 +103,54 @@ export const ingredientRouter = createRouter()
         where: { recipeId: recipeId, ingredientId: ingredientId },
       });
       return missingAm.amountUsed;
+    },
+  })
+  .mutation("reduceIng", {
+    input: z.object({
+      ingredientId: z.string(),
+    }),
+    async resolve({ input, ctx }) {
+      const ingId = input?.ingredientId;
+      const ing = await ctx.prisma.ingredient.findFirstOrThrow({
+        where: { id: ingId },
+      });
+      if (ing.quantity >= 1) {
+        const change = await ctx.prisma.ingredient.update({
+          where: { id: ingId },
+          data: { quantity: ing.quantity - 1 },
+        });
+      }
+    },
+  })
+  .mutation("increaseIng", {
+    input: z.object({
+      ingredientId: z.string(),
+    }),
+    async resolve({ input, ctx }) {
+      const ingId = input?.ingredientId;
+      const ing = await ctx.prisma.ingredient.findFirstOrThrow({
+        where: { id: ingId },
+      });
+      const change = await ctx.prisma.ingredient.update({
+        where: { id: ingId },
+        data: { quantity: ing.quantity + 1 },
+      });
+    },
+  })
+  .mutation("useIngRecipe", {
+    input: z.object({
+      ingredientId: z.string(),
+      amountUsed: z.number().nullish(),
+    }),
+    async resolve({ input, ctx }) {
+      const ingId = input?.ingredientId;
+      const ingUse = input?.amountUsed;
+      const ing = await ctx.prisma.ingredient.findFirstOrThrow({
+        where: { id: ingId },
+      });
+      const change = await ctx.prisma.ingredient.update({
+        where: { id: ingId },
+        data: { quantity: Math.max(0, ing.quantity - (ingUse ?? 0)) },
+      });
     },
   });

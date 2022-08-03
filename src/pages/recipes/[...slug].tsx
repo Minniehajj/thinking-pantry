@@ -1,19 +1,43 @@
 import { GetStaticPaths, GetStaticProps, GetStaticPropsContext } from "next";
-import { ParsedUrlQuery } from "querystring";
 import { trpc } from "../../utils/trpc";
 import { prisma } from "../../server/db/client";
 import ListOfIngMiss from "../components/ListOfMissingIng";
 import ListOfIngForRecipe from "../components/ListOfIngForRec";
+import Link from "next/link";
 
 export default function Recipe({ data }: { data: string }) {
+  const utils = trpc.useContext();
   const name = data.replaceAll("_", " ");
   const recipe = trpc.useQuery([
     "recipe.getRecipeByName",
     { recipeName: name },
   ]);
 
+  const cookRecipe = trpc.useMutation(["recipe.cookRecipe"], {
+    async onSuccess() {
+      await utils.invalidateQueries(["recipe.getIngs"]);
+      await utils.invalidateQueries(["recipe.getMissingIng"]);
+      await utils.invalidateQueries(["recipe.getMissingIngAm"]);
+    },
+  });
+
+  const cook = (
+    recId: void | { recipeId?: string | null | undefined } | null | undefined
+  ) => {
+    cookRecipe.mutate(recId);
+  };
+
   return (
     <>
+      <Link href="/">
+        <a>Home</a>
+      </Link>
+      <Link href="/AllRecipes">
+        <a>List of All Recipes</a>
+      </Link>
+      <Link href="/ingredients">
+        <a>List of Ingredients</a>
+      </Link>
       <div>
         <h1>{recipe.data?.name}</h1>
       </div>
@@ -30,6 +54,12 @@ export default function Recipe({ data }: { data: string }) {
         <></>
       </div>
       <ListOfIngMiss recId={recipe?.data?.id ?? ""} />
+      <button
+        className="m-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        onClick={async () => cook({ recipeId: recipe.data?.id })}
+      >
+        make recipe!
+      </button>
     </>
   );
 }
@@ -55,7 +85,6 @@ export const getStaticProps: GetStaticProps = async (
   context: GetStaticPropsContext
 ) => {
   const slug = context?.params?.slug || [];
-  console.log(slug);
   return {
     props: {
       data: slug[0],

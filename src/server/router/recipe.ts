@@ -17,7 +17,6 @@ export const recipeRouter = createRouter()
   .query("getRecipesAble", {
     async resolve({ ctx }) {
       const recipesA = await ctx.prisma.recipe.findMany({});
-
       const recipeMeetingCrit = Promise.all(
         recipesA.map(async (a) => {
           const ingredientCount = await ctx.prisma.ingredientUsed.findMany({
@@ -30,15 +29,11 @@ export const recipeRouter = createRouter()
                 await ctx.prisma.ingredient.findFirstOrThrow({
                   where: { id: b.ingredientId },
                 });
-              console.log(ingredientGood?.quantity >= b.amountUsed);
 
               return ingredientGood?.quantity >= b.amountUsed;
             })
           );
-          console.log((await ingArr).entries);
-          //res is an array of true or false based on whether there is enough for the recipe
-          //if (await ingArr.every(Boolean)) {
-          //adjust this to see if how man //if all true then return the recipe
+
           if ((await ingArr).every(Boolean)) {
             return a;
           }
@@ -180,5 +175,72 @@ export const recipeRouter = createRouter()
         })
       );
       return ingredients;
+    },
+  })
+  .mutation("cookRecipe", {
+    input: z
+      .object({
+        recipeId: z.string().nullish(),
+      })
+      .nullish(),
+    async resolve({ input, ctx }) {
+      const recipeId = input?.recipeId;
+      const ingredientCount = await ctx.prisma.ingredientUsed.findMany({
+        where: { recipeId: recipeId },
+        select: {
+          ingredientId: true,
+          amountUsed: true,
+          ingredient: { select: { quantity: true } },
+        },
+      });
+
+      await prisma?.$transaction(
+        ingredientCount.map(async (a) => {
+          await ctx.prisma.ingredient.update({
+            where: { id: a.ingredientId },
+            data: {
+              quantity: Math.max(0, a.ingredient.quantity - a.amountUsed),
+            },
+          });
+        })
+      );
+    },
+  })
+  .mutation("reduceIngUsed", {
+    input: z.object({
+      ingredientId: z.string(),
+      recipeId: z.string(),
+    }),
+    async resolve({ input, ctx }) {
+      const ingId = input?.ingredientId;
+      const recId = input?.recipeId;
+      const ingUsed = await ctx.prisma.ingredientUsed.findFirstOrThrow({
+        where: { ingredientId: ingId, recipeId: recId },
+      });
+      await ctx.prisma.ingredientUsed.update({
+        where: { id: ingUsed.id },
+        data: {
+          amountUsed: Math.max(0, ingUsed.amountUsed - 1),
+        },
+      });
+    },
+  })
+  .mutation("increaseIngUsed", {
+    input: z.object({
+      ingredientId: z.string(),
+      recipeId: z.string(),
+    }),
+    async resolve({ input, ctx }) {
+      const ingId = input?.ingredientId;
+      const recId = input?.recipeId;
+      const ingUsed = await ctx.prisma.ingredientUsed.findFirstOrThrow({
+        where: { ingredientId: ingId, recipeId: recId },
+      });
+      await ctx.prisma.ingredientUsed.update({
+        where: { id: ingUsed.id },
+        data: {
+          amountUsed: Math.max(0, ingUsed.amountUsed + 1),
+        },
+      });
     },
   });

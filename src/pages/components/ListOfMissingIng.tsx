@@ -6,7 +6,6 @@ const ListOfIngMiss = ({ recId }: { recId: string }) => {
     "recipe.getMissingIngAm",
     { recipeId: recId },
   ]);
-  console.log(data);
 
   return (
     <div>

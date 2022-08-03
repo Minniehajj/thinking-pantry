@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 import { trpc } from "../../utils/trpc";
 
@@ -9,20 +10,32 @@ const ListOfRecipesCanUse = () => {
         {data && (
           <>
             {data.map((recipe, key) => {
+              const recipeLink = recipe?.name.replace(" ", "_");
               return (
                 <React.Fragment key={key}>
-                  <div className="row-span-6 place-content-center rounded-lg">
-                    recipe image
-                  </div>
-                  <div className="col-span-5 text-center rounded-lg bg-lime-500">
-                    {recipe?.name}
-                  </div>
-                  <div className="pl-3 row-span-5 gap-8 rounded-lg bg-lime-800 col-span-4">
-                    {recipe?.description}
-                  </div>
-                  <div className="row-span-1 text-center rounded-lg col-span-1">
-                    {recipe?.difficulty}
-                  </div>
+                  <Link
+                    href={`/recipes/${encodeURIComponent(
+                      recipeLink ?? "gobildygook"
+                    )}`}
+                    key={key}
+                    passHref={true}
+                  >
+                    <a>
+                      <div className="row-span-6 place-content-center rounded-lg">
+                        recipe image
+                      </div>
+
+                      <div className="col-span-5 text-center rounded-lg bg-lime-500">
+                        {recipe?.name}
+                      </div>
+                      <div className="pl-3 row-span-5 gap-8 rounded-lg bg-lime-800 col-span-4">
+                        {recipe?.description}
+                      </div>
+                      <div className="row-span-1 text-center rounded-lg col-span-1">
+                        {recipe?.difficulty}
+                      </div>
+                    </a>
+                  </Link>
                 </React.Fragment>
               );
             })}
