@@ -195,9 +195,9 @@ export const recipeRouter = createRouter()
         },
       });
 
-      await prisma?.$transaction(async (prisma) => {
+      await ctx.prisma?.$transaction(async (prisma) => {
         ingredientCount.forEach(async (a) => {
-          return await prisma.ingredient.update({
+          return await ctx.prisma.ingredient.update({
             where: { id: a.ingredientId },
             data: {
               quantity: a.ingredient.quantity - a.amountUsed,
