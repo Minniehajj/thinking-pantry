@@ -1,5 +1,5 @@
 import { createRouter } from "./context";
-import { boolean, date, z } from "zod";
+import { boolean, date, number, z } from "zod";
 import { PrismaPromise } from "@prisma/client";
 
 export const recipeRouter = createRouter()
@@ -240,6 +240,58 @@ export const recipeRouter = createRouter()
         where: { id: ingUsed.id },
         data: {
           amountUsed: Math.max(0, ingUsed.amountUsed + 1),
+        },
+      });
+    },
+  })
+  .mutation("changeRecipeDesc", {
+    input: z.object({
+      recipeDesc: z.string(),
+      recipeId: z.string(),
+    }),
+    async resolve({ input, ctx }) {
+      const recDesc = input?.recipeDesc;
+      const recId = input?.recipeId;
+      const edited = await ctx.prisma.recipe.update({
+        where: { id: recId },
+        data: { description: recDesc },
+      });
+    },
+  })
+  .mutation("changeRecipeInstructions", {
+    input: z.object({
+      recipeInst: z.string(),
+      recipeId: z.string(),
+    }),
+    async resolve({ input, ctx }) {
+      const recInst = input?.recipeInst;
+      const recId = input?.recipeId;
+      const edited = await ctx.prisma.recipe.update({
+        where: { id: recId },
+        data: { instructions: recInst },
+      });
+    },
+  })
+  .mutation("createRecipe", {
+    input: z
+      .object({
+        recipeName: z.string().nullish(),
+        recipeDesc: z.string().nullish(),
+        recipeInstructions: z.string().nullish(),
+        recipeTime: z.number().nullish(),
+        recipeDiff: z.number().nullish(),
+        season: z.string(),
+      })
+      .nullish(),
+    async resolve({ input, ctx }) {
+      await ctx.prisma.recipe.create({
+        data: {
+          name: input?.recipeName ?? "",
+          description: input?.recipeDesc ?? "",
+          instructions: input?.recipeInstructions ?? "",
+          difficulty: input?.recipeDiff ?? 0,
+          time: input?.recipeTime ?? 0,
+          season: input?.season ?? "",
         },
       });
     },

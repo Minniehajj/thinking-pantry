@@ -1,28 +1,23 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import React from "react";
-import { ingredientRouter } from "../server/router/ingredient";
-import { recipeRouter } from "../server/router/recipe";
 import { trpc } from "../utils/trpc";
 import Link from "next/link";
-import ListOfIngredients from "./components/ListOfIngredients";
+import DynamicIngs from "./components/DynamicIngsSelect";
 
 const Home: NextPage = () => {
   const utils = trpc.useContext();
-  const allIngredients = trpc.useQuery(["ingredient.getAll"]);
-  //const SubmitForm = trpc.useQuery(["ingredient.hello", { text: "from tRPC" }]);
   const mutateData = trpc.useMutation(["ingredient.createIngredient"], {
     async onSuccess() {
       await utils.invalidateQueries(["ingredient.getAll"]);
     },
   });
-  const recipesAble = trpc.useQuery(["recipe.getRecipesAble"]);
+
 
   const [name, setName] = React.useState("");
   const [quanity, setQuanity] = React.useState(Number);
   const [canBeUsedUp, setCanBeUsedUp] = React.useState(false);
-  const [category, setCategory] = React.useState("");
-  //console.log(JSON.stringify(allIngredients));
+  const [category, setCategory] = React.useState("Dairy");
 
   const submitForm = async () => {
     console.log(name, quanity, canBeUsedUp, category);
@@ -54,24 +49,7 @@ const Home: NextPage = () => {
           onSubmit={submitForm}
           className="w-full max-w-lg flex gap-2 flex-wrap"
         >
-          <input
-            type="text"
-            className="border p-2"
-            name="Name"
-            placeholder="Name"
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            type="number"
-            className="border p-2"
-            name="Quantity"
-            placeholder="Quantity"
-            onChange={(e) => setQuanity(parseInt(e.target.value))}
-          />
           <div className="flex items-center gap-2">
-            <label htmlFor="canBeUsedUp" className="ml-2">
-              Can Be Used Up
-            </label>
             {/* <input
               type="checkbox"
               className="border p-2"
@@ -86,6 +64,25 @@ const Home: NextPage = () => {
               <option value="Vegetable">Vegetable</option>
             </select>
           </div>
+          <select
+            onChange={(e) => setName(e.target.value)}>
+            <DynamicIngs category={category}></DynamicIngs>
+          </select>
+          {/* <input
+            type="text"
+            className="border p-2"
+            name="Name"
+            placeholder="Name"
+            onChange={(e) => setName(e.target.value)}
+          /> */}
+          <input
+            type="number"
+            className="border p-2"
+            name="Quantity"
+            placeholder="Quantity"
+            onChange={(e) => setQuanity(parseInt(e.target.value))}
+          />
+
           <button type="submit" className="border p-2">
             Submit
           </button>

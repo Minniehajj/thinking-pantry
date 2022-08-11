@@ -54,7 +54,7 @@ const ListOfIngForRecipe = ({ recId }: { recId: string }) => {
   };
 
   return (
-    <div>
+    <div>   
       <div className="grid gap-8 grid-cols-5 max-w-xl">
         {data && (
           <>

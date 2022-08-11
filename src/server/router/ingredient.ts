@@ -153,4 +153,23 @@ export const ingredientRouter = createRouter()
         data: { quantity: Math.max(0, ing.quantity - (ingUse ?? 0)) },
       });
     },
+  })
+  .query("getAllByCat", {
+    input: z.object({
+      category: z.string(),
+    }),
+    async resolve({ ctx, input }) {
+      const cat = input?.category;
+      return await ctx.prisma.ingredient.findMany({
+        where: { category: { name: cat } },
+        select: { name: true },
+      });
+    },
+  })
+  .query("getAllCategories", {
+    async resolve({ ctx }) {
+      return await ctx.prisma.category.findMany({
+        select: { name: true },
+      });
+    },
   });
