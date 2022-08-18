@@ -1,6 +1,7 @@
 import { createRouter } from "./context";
-import { boolean, date, number, z } from "zod";
+import { boolean, date, number, string, z } from "zod";
 import { PrismaPromise } from "@prisma/client";
+import ingredients from "../../pages/api/ingredients";
 
 export const recipeRouter = createRouter()
   .query("hello", {
@@ -168,7 +169,10 @@ export const recipeRouter = createRouter()
               quantity: true,
               name: true,
               id: true,
-              IngredientUsed: { select: { amountUsed: true } },
+              IngredientUsed: {
+                where: { ingredientId: a.ingredientId, recipeId: recipeId },
+                select: { amountUsed: true },
+              },
             },
           });
 
@@ -281,10 +285,16 @@ export const recipeRouter = createRouter()
         recipeTime: z.number().nullish(),
         recipeDiff: z.number().nullish(),
         season: z.string(),
+        ingredients: z.array(
+          z.object({
+            ingredientEntry: z.string(),
+            ingredientAmount: z.number(),
+          })
+        ),
       })
       .nullish(),
     async resolve({ input, ctx }) {
-      await ctx.prisma.recipe.create({
+      const rec = await ctx.prisma.recipe.create({
         data: {
           name: input?.recipeName ?? "",
           description: input?.recipeDesc ?? "",
@@ -293,6 +303,57 @@ export const recipeRouter = createRouter()
           time: input?.recipeTime ?? 0,
           season: input?.season ?? "",
         },
+        select: { id: true },
+      });
+
+      const queries = input?.ingredients.map((a) => {
+        return ctx.prisma.ingredientUsed.create({
+          data: {
+            amountUsed: a.ingredientAmount ?? 0,
+            ingredient: { connect: { id: a.ingredientEntry } },
+            Recipe: { connect: { id: rec.id } },
+          },
+        });
+      });
+
+      return await ctx.prisma?.$transaction([...(queries ?? [])]);
+    },
+  })
+  .mutation("addIngredientToNewRec", {
+    input: z
+      .object({
+        recipe: z.string().nullish(),
+        ingredientId: z.string().nullish(),
+        amountUsed: z.number().nullish(),
+      })
+      .nullish(),
+    async resolve({ input, ctx }) {
+      const rec = await ctx.prisma.recipe.findFirstOrThrow({
+        where: { name: input?.recipe ?? "" },
+        select: { id: true },
+      });
+
+      const ing = await ctx.prisma.ingredient.findFirstOrThrow({
+        where: { name: input?.ingredientId ?? "" },
+        select: { id: true },
+      });
+      await ctx.prisma.ingredientUsed.create({
+        data: {
+          amountUsed: input?.amountUsed ?? 0,
+          ingredient: { connect: { id: ing.id } },
+          Recipe: { connect: { id: rec.id } },
+        },
+      });
+    },
+  })
+  .mutation("deleteRecipe", {
+    input: z.object({
+      recipeId: z.string(),
+    }),
+    async resolve({ input, ctx }) {
+      const recId = input?.recipeId;
+      await ctx.prisma.recipe.delete({
+        where: { id: recId },
       });
     },
   });

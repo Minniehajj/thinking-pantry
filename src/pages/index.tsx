@@ -4,6 +4,8 @@ import React from "react";
 import { trpc } from "../utils/trpc";
 import Link from "next/link";
 import DynamicIngs from "./components/DynamicIngsSelect";
+import GetCategoriesForOption from "./components/GetCategoryForOption";
+import DynamicIngsIndex from "./components/DynamicIngsForIndex";
 
 const Home: NextPage = () => {
   const utils = trpc.useContext();
@@ -13,7 +15,6 @@ const Home: NextPage = () => {
     },
   });
 
-
   const [name, setName] = React.useState("");
   const [quanity, setQuanity] = React.useState(Number);
   const [canBeUsedUp, setCanBeUsedUp] = React.useState(false);
@@ -22,7 +23,7 @@ const Home: NextPage = () => {
   const submitForm = async () => {
     console.log(name, quanity, canBeUsedUp, category);
 
-    const input = {
+    const inputs = {
       name: name,
       quanity: quanity,
       canBeUsedUp: canBeUsedUp,
@@ -57,17 +58,17 @@ const Home: NextPage = () => {
               name="canBeUsedUp"
               onChange={(e) => setCanBeUsedUp(e.target.checked)}
             /> */}
-            <select onChange={(e) => setCategory(e.target.value)}>
-              <option value="Dairy">Dairy</option>
-              <option value="Raw Meat">Raw Meat</option>
-              <option value="Bread">Bread</option>
-              <option value="Vegetable">Vegetable</option>
+            <select onChange={(e) => {setCategory(e.target.value) }}>
+              <GetCategoriesForOption />
             </select>
           </div>
-          <select
-            onChange={(e) => setName(e.target.value)}>
-            <DynamicIngs category={category}></DynamicIngs>
-          </select>
+
+          <DynamicIngsIndex
+            category={category}
+            ingredient={name}
+            setIngredientEntry={setName}
+          ></DynamicIngsIndex>
+
           {/* <input
             type="text"
             className="border p-2"

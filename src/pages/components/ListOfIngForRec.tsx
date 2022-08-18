@@ -11,17 +11,20 @@ const ListOfIngForRecipe = ({ recId }: { recId: string }) => {
   const addOne = trpc.useMutation(["recipe.increaseIngUsed"], {
     async onSuccess() {
       await utils.invalidateQueries(["recipe.getIngs"]);
+      await utils.invalidateQueries(["recipe.getMissingIngAm"]);
     },
   });
   const subtractOne = trpc.useMutation(["recipe.reduceIngUsed"], {
     async onSuccess() {
       await utils.invalidateQueries(["recipe.getIngs"]);
+      await utils.invalidateQueries(["recipe.getMissingIngAm"]);
     },
   });
 
   const useIngredientForRecipe = trpc.useMutation(["ingredient.useIngRecipe"], {
     async onSuccess() {
       await utils.invalidateQueries(["recipe.getIngs"]);
+      await utils.invalidateQueries(["recipe.getMissingIngAm"]);
     },
   });
 
@@ -52,13 +55,14 @@ const ListOfIngForRecipe = ({ recId }: { recId: string }) => {
       ingredientId: ingId.ingredientId,
     });
   };
-
+  console.log(data);
   return (
-    <div>   
+    <div>
       <div className="grid gap-8 grid-cols-5 max-w-xl">
         {data && (
           <>
             {data.map((ing, key) => {
+              console.log(ing);
               return (
                 <React.Fragment key={key}>
                   <span>{ing?.name}</span>

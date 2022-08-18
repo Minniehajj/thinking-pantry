@@ -2,9 +2,9 @@ import React, { Dispatch, SetStateAction, useEffect } from "react";
 import { trpc } from "../../utils/trpc";
 import ingredientPage from "../ingredients";
 
-const DynamicIngs = ({
+const DynamicIngsIndex = ({
   category: category,
-  ingredient: ingredientEntry,
+  ingredient: name,
   setIngredientEntry: updateIng,
 }: {
   category: string;
@@ -18,7 +18,7 @@ const DynamicIngs = ({
 
   useEffect(() => {
     if (data && data[0]) {
-      updateIng(data[0].id);
+      updateIng(data[0].name);
     }
   }, [data, updateIng]);
 
@@ -28,7 +28,6 @@ const DynamicIngs = ({
         onChange={(e) => {
           updateIng(e.target.value);
         }}
-        // value={ingredientEntry}
         placeholder="ingredient"
       >
         {data && (
@@ -36,7 +35,9 @@ const DynamicIngs = ({
             {data.map((a, key) => {
               return (
                 <React.Fragment key={key}>
-                  <option value={a.id}>{a.name}</option>
+                  <option value={a.name} selected={a.name === name}>
+                    {a.name}
+                  </option>
                 </React.Fragment>
               );
             })}
@@ -47,4 +48,4 @@ const DynamicIngs = ({
   );
 };
 
-export default DynamicIngs;
+export default DynamicIngsIndex;

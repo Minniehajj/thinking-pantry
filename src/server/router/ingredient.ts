@@ -162,7 +162,7 @@ export const ingredientRouter = createRouter()
       const cat = input?.category;
       return await ctx.prisma.ingredient.findMany({
         where: { category: { name: cat } },
-        select: { name: true },
+        select: { name: true, id: true },
       });
     },
   })
@@ -170,6 +170,18 @@ export const ingredientRouter = createRouter()
     async resolve({ ctx }) {
       return await ctx.prisma.category.findMany({
         select: { name: true },
+      });
+    },
+  })
+  .query("getIdByName", {
+    input: z
+      .object({
+        name: z.string().nullish(),
+      })
+      .nullish(),
+    async resolve({ ctx, input }) {
+      return await ctx.prisma.ingredient.findFirstOrThrow({
+        where: { name: input?.name ?? "" },
       });
     },
   });

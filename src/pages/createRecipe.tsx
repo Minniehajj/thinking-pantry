@@ -1,10 +1,20 @@
+import Link from "next/link";
 import React from "react";
 import { trpc } from "../utils/trpc";
-import AddIngredientToNewRecipe from "./components/AddIngredientMakeRecipe";
 import DynamicIngs from "./components/DynamicIngsSelect";
+import GetCategoriesForOption from "./components/GetCategoryForOption";
 
 const CreateRecipePage = () => {
-  const makeRecipe = trpc.useMutation(["recipe.createRecipe"]);
+  const utils = trpc.useContext();
+  const makeRecipe = trpc.useMutation(["recipe.createRecipe"], {
+    async onSuccess() {
+      await utils.invalidateQueries(["recipe.getIngs"]);
+      await utils.invalidateQueries(["recipe.getMissingIng"]);
+      await utils.invalidateQueries(["recipe.getMissingIngAm"]);
+    },
+  });
+  const getIngId = trpc.useQuery(["ingredient.getIdByName"]);
+  const addIngredient = trpc.useMutation(["recipe.addIngredientToNewRec"]);
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [instruction, setInstructions] = React.useState("");
@@ -13,7 +23,10 @@ const CreateRecipePage = () => {
   const [difficulty, setDifficulty] = React.useState<number>(0);
   const [cookTime, setCookTime] = React.useState<number>(0);
   const [season, setSeason] = React.useState("");
-  const [category, setCategory] = React.useState("Dairy");
+  const [category, setCategory] = React.useState("");
+  const [ingredientNames, setIngredientNames] = React.useState<
+    { ingName: string }[]
+  >([]);
   const [ingredients, setIngredients] = React.useState<
     {
       ingredientEntry: string;
@@ -29,14 +42,25 @@ const CreateRecipePage = () => {
       recipeTime: cookTime,
       recipeDiff: difficulty,
       season: season,
+      ingredients: ingredients,
     });
 
-    if (ingredients.length > 0) {
-    }
+    // if (ingredients.length > 0) {
+    //   ingredients.map(async (a) => {
+    //     addIngredient.mutate({
+    //       recipe: name,
+    //       ingredientId: a.ingredientEntry,
+    //       amountUsed: a.ingredientAmount,
+    //     });
+    //   });
+    // }
   };
 
   return (
     <>
+      <Link href="/AllRecipes">
+        <a>List of All Recipes</a>
+      </Link>
       <form onSubmit={submitForm}>
         <input
           type="text"
@@ -77,58 +101,78 @@ const CreateRecipePage = () => {
           onChange={(e) => setCookTime(parseInt(e.target.value))}
         ></input>
 
-        <select onChange={(e) => setSeason(e.target.value)}>
+        <select
+          onChange={(e) => setSeason(e.target.value)}
+          placeholder="season"
+        >
           <option value="summer">Summer</option>
           <option value="winter">Winter</option>
           <option value="fall">Fall</option>
           <option value="spring">Spring</option>
         </select>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (ingredients?.length > 0) {
-              setIngredients([
-                ...ingredients,
-                { ingredientEntry, ingredientAmount },
-              ]);
-            } else {
-              setIngredients([{ ingredientEntry, ingredientAmount }]);
-            }
-            setIngredientEntry("");
-          }}
-        >
-          <select onChange={(e) => setCategory(e.target.value)}>
-            <option value="Dairy">Dairy</option>
-            <option value="Raw Meat">Raw Meat</option>
-            <option value="Bread">Bread</option>
-            <option value="Vegetable">Vegetable</option>
-          </select>
-          <select onChange={(e) => setIngredientEntry(e.target.value)}>
-            <DynamicIngs category={category}></DynamicIngs>
-          </select>
-          <input
-            type="number"
-            onChange={(e) => setIngredientAmount(Number(e.target.value))}
-          >
-            <button
-              className="m-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() => setIngredientAmount(ingredientAmount + 1)}
-            >
-              +
-            </button>
-            <span>{ingredientAmount}</span>
-            <button
-              className="m-6 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              onClick={() =>
-                setIngredientAmount(Math.max(0, ingredientAmount - 1))
-              }
-            >
-              -
-            </button>
-          </input>
+        <button type="submit">
+          make recipe (press this when ingredients all added)
+        </button>
+      </form>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (ingredients?.length > 0) {
+            setIngredients([
+              ...ingredients,
+              { ingredientEntry, ingredientAmount },
+            ]);
+          } else {
+            setIngredients([{ ingredientEntry, ingredientAmount }]);
+          }
 
-          <button type="submit">Add Ingredient To Recipe</button>
-        </form>
+          setIngredientAmount(0);
+        }}
+      >
+        <select
+          onChange={(e) => setCategory(e.target.value)}
+          placeholder="category"
+        >
+          <GetCategoriesForOption />
+        </select>
+        {/* <select
+          onChange={(e) => setIngredientEntry(e.target.value)}
+          placeholder="ingredient"
+        > */}
+        <DynamicIngs
+          ingredient={ingredientEntry}
+          setIngredientEntry={setIngredientEntry}
+          category={category}
+        ></DynamicIngs>
+        {/* </select> */}
+        <input
+          type="number"
+          onChange={(e) => {
+            console.log(e);
+            setIngredientAmount(Number(e.target.value));
+          }}
+          defaultValue="0"
+          placeholder="quantity Of Ingredient"
+        />
+
+        <button type="submit">Add Ingredient To Recipe</button>
+        <span>
+          <ul>
+            {ingredients && (
+              <>
+                {ingredients.map((ingre, key) => {
+                  return (
+                    <React.Fragment key={key}>
+                      <li>
+                        {ingre.ingredientEntry} {ingre.ingredientAmount}
+                      </li>
+                    </React.Fragment>
+                  );
+                })}
+              </>
+            )}
+          </ul>
+        </span>
       </form>
     </>
   );
